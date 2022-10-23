@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 comrak = "0.14"
+rlua="0.19.4"
