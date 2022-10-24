@@ -50,4 +50,12 @@ mod tests {
         let result = parser.evaluate::<i32>(input);
         assert_eq!(result.expect("i32 expected"), 2)
     }
+
+    #[test]
+    fn test_evaluate_f32_result() {
+        let parser = RLuaParser::new();
+        let input = r#"1.01 + 1.01"#;
+        let result = parser.evaluate::<f32>(input);
+        assert_eq!(result.expect("f32 expected"), 2.02)
+    }
 }
