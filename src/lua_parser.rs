@@ -3,7 +3,7 @@ use rlua::{Lua, Result, FromLuaMulti};
 pub trait LuaParser {
     fn execute(&self, lua_script: &String);
 
-    ///https://www.reddit.com/r/rust/comments/fkrakp/rlua_how_do_i_make_a_generic_eval_function
+    //https://www.reddit.com/r/rust/comments/fkrakp/rlua_how_do_i_make_a_generic_eval_function
     fn evaluate<T: for<'lua> FromLuaMulti<'lua>>(&self, script: &str) -> Result<T>;
 }
 
