@@ -1,9 +1,10 @@
-use rlua::Lua;
-
+use rlua::{Lua, Result, FromLuaMulti};
 
 pub trait LuaParser {
     fn execute(&self, lua_script: &String);
-    fn evaluate(&self, lua_script: &String) -> String;
+
+    ///https://www.reddit.com/r/rust/comments/fkrakp/rlua_how_do_i_make_a_generic_eval_function
+    fn evaluate<T: for<'lua> FromLuaMulti<'lua>>(&self, script: &str) -> Result<T>;
 }
 
 pub struct RLuaParser {}
@@ -17,24 +18,36 @@ impl LuaParser for RLuaParser {
         });
     }
 
-    fn evaluate(&self, lua_script: &String) -> String {
-        let lua = Lua::new();
-        let result = lua.context(|ctx| {
-            let result = ctx.load(lua_script).eval::<String>();
-            return result
-        }).expect("Expected a String");
-        return result;
+    fn evaluate<T: for<'lua> FromLuaMulti<'lua>>(&self, script: &str) -> Result<T> {
+        return Lua::new().context(|lua_ctx|
+            lua_ctx.load(script).eval()
+        )
     }
 }
+
+impl RLuaParser {
+    fn new() -> RLuaParser {
+        return RLuaParser {}
+    }
+}
+
 
 mod tests {
     use super::*;
 
     #[test]
-    fn test_evaluate() {
-        let parser = RLuaParser{};
+    fn test_evaluate_string_result() {
+        let parser = RLuaParser::new();
         let input = r#""a".."b".."c""#;
-        let result = parser.evaluate(&String::from(input));
-        assert_eq!(result, "abc")
+        let result = parser.evaluate::<String>(input);
+        assert_eq!(result.expect("String expected"), "abc")
+    }
+
+    #[test]
+    fn test_evaluate_i32_result() {
+        let parser = RLuaParser::new();
+        let input = r#"1 + 1"#;
+        let result = parser.evaluate::<i32>(input);
+        assert_eq!(result.expect("i32 expected"), 2)
     }
 }
